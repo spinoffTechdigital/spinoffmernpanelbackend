@@ -177,4 +177,14 @@ router.post('/contactsubmit',async (req,res)=>{
   }
 });
 
+router.get('/getcontactdata',async (req,res)=>{
+  try {
+    const contactdata= await Contact.find();
+    res.json(contactdata);
+  } catch (error) {
+    console.log("Error in fetching users:", error);
+    res.status(500).json({ message: "Error fetching users" });
+  }
+});
+
 module.exports = router;
