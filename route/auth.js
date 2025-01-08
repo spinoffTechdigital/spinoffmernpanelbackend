@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 const Log = require("../model/Log");
+const Director = require("../model/Director");
 const Contact = require('../model/Contactus');
 const multer = require("multer");
 const path = require("path");
@@ -201,6 +202,30 @@ router.delete("/users/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting user:", error);
     res.status(500).json({ message: "Error deleting user" });
+  }
+});
+
+router.post("/board-of-directors", upload.single("image"), async (req, res) => {
+  try {
+    const { name, designation, profileSummary } = req.body;
+    const image = req.file ? req.file.filename : null;
+
+    const newDirector = new Director({
+      name,
+      designation,
+      profileSummary,
+      image,
+    });
+
+    const savedDirector = await newDirector.save();
+
+    res.status(201).json({
+      message: "Board of Directors details submitted successfully!",
+      data: savedDirector,
+    });
+  } catch (error) {
+    console.error("Error saving Board of Director:", error);
+    res.status(500).json({ error: "Failed to submit data." });
   }
 });
 
