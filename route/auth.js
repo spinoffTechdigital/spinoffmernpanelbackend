@@ -231,7 +231,7 @@ router.post("/board-of-directors", upload.single("image"), async (req, res) => {
 
 router.get("/board-of-directors", async (req, res) => {
   try {
-    const directors = await BoardOfDirector.find(); // Fetch data from MongoDB
+    const directors = await Director.find(); 
     res.status(200).json({
       message: "Directors fetched successfully!",
       data: directors,
@@ -239,6 +239,50 @@ router.get("/board-of-directors", async (req, res) => {
   } catch (error) {
     console.error("Error fetching directors:", error);
     res.status(500).json({ error: "Failed to fetch directors." });
+  }
+});
+
+router.get("/boardofDirector/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const  BoardOfDirector = await  Director.findById(id);
+
+    if (!BoardOfDirector) {
+      return res.status(404).json({ error: "BoardOfDirector not found" });
+    }
+
+    res.json(BoardOfDirector);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/updateboardofDirector/:id", async (req, res) => {
+  try {
+    const updatedBoardOfDirector = await  Director.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(updatedBoardOfDirector);
+  } catch (error) {
+    res.status(500).json({ error: "Error updating user" });
+  }
+});
+
+router.delete("/deleteboardofDirector/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedUser = await Director.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully", user: deletedUser });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Error deleting user" });
   }
 });
 
