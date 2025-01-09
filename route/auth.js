@@ -231,7 +231,7 @@ router.post("/board-of-directors", upload.single("image"), async (req, res) => {
 
 router.get("/board-of-directors", async (req, res) => {
   try {
-    const directors = await BoardOfDirector.find();
+    const directors = await Director.find();
     res.status(200).json({
       message: "Directors fetched successfully!",
       data: directors,
