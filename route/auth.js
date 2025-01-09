@@ -258,9 +258,12 @@ router.get("/boardofDirector/:id", async (req, res) => {
   }
 });
 
-router.put("/updateboardofDirector/:id", async (req, res) => {
+router.put("/updateboardofDirector/:id", upload.single('image'), async (req, res) => {
   try {
-    const updatedBoardOfDirector = await  Director.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedBoardOfDirector = await Director.findByIdAndUpdate(req.params.id, {
+      ...req.body, 
+      image: req.file ? req.file.path : undefined
+    }, {
       new: true,
     });
     res.json(updatedBoardOfDirector);
