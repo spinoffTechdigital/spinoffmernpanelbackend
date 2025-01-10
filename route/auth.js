@@ -60,12 +60,6 @@ router.get("/typeCount", async (req, res) => {
   }
 });
 
-
-
-router.get("/getData",(req,res)=>{
-  return res.json("hello");
-})
-
 router.post("/register", upload.single("profileImage"), async (req, res) => {
   const { name, email, password, mobile, designation, role } = req.body;
 
