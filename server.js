@@ -6,6 +6,8 @@ const userRoutes = require("./route/userRoutes");
 const directorRoutes = require("./route/directorRoutes");
 const contactRoutes = require("./route/contactRoutes");
 const logRoutes = require("./route/logRoutes");
+const committeeRoutes = require("./route/committeeRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -19,6 +21,7 @@ app.use('/api/auth', userRoutes);
 app.use('/api/director',directorRoutes);
 app.use('/api/contact',contactRoutes);
 app.use('/api/clicklogs',logRoutes);
+app.use('/api/committee',committeeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
