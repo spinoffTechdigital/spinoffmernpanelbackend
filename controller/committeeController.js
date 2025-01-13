@@ -1,16 +1,21 @@
+const cloudinary = require('cloudinary').v2;
 const Committee = require("../model/Committee");
+
 
 const createCommittee = async (req, res) => {
   try {
-    const { name, designation, profileSummary,committeecategory} = req.body;
-    const image = req.file ? req.file.filename : null;
+    const { name, designation, profileSummary, committeecategory, image } = req.body;
 
+    if (!name || !designation || !profileSummary || !committeecategory) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    const imageUrl = image || null;  
     const newCommittee = new Committee({
       name,
       designation,
       profileSummary,
       committeecategory,
-      image,
+      image: imageUrl,
     });
 
     const savedCommittee = await newCommittee.save();
@@ -19,6 +24,7 @@ const createCommittee = async (req, res) => {
       message: "Board of Committees details submitted successfully!",
       data: savedCommittee,
     });
+
   } catch (error) {
     console.error("Error saving Board of Committee:", error);
     res.status(500).json({ error: "Failed to submit data." });
@@ -37,6 +43,7 @@ const getAllCommittees = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch Committees." });
   }
 };
+
 
 const getCommitteeById = async (req, res) => {
   try {
@@ -57,11 +64,13 @@ const getCommitteeById = async (req, res) => {
 
 const updateCommitteeById = async (req, res) => {
   try {
+    const imageUrl = req.file ? req.file.secure_url : undefined;
+
     const updatedBoardOfCommittee = await Committee.findByIdAndUpdate(
       req.params.id,
       {
         ...req.body,
-        image: req.file ? req.file.path : undefined,
+        image: imageUrl, 
       },
       {
         new: true,
@@ -70,27 +79,27 @@ const updateCommitteeById = async (req, res) => {
 
     res.json(updatedBoardOfCommittee);
   } catch (error) {
-    res.status(500).json({ error: "Error updating user" });
+    console.error("Error updating committee:", error);
+    res.status(500).json({ error: "Error updating committee" });
   }
 };
 
 const deleteCommitteeById = async (req, res) => {
   try {
     const { id } = req.params;
+    const deletedCommittee = await Committee.findByIdAndDelete(id);
 
-    const deletedUser = await Committee.findByIdAndDelete(id);
-
-    if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
+    if (!deletedCommittee) {
+      return res.status(404).json({ message: "Committee not found" });
     }
 
     res.status(200).json({
-      message: "User deleted successfully",
-      user: deletedUser,
+      message: "Committee deleted successfully",
+      committee: deletedCommittee,
     });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ message: "Error deleting user" });
+    console.error("Error deleting committee:", error);
+    res.status(500).json({ message: "Error deleting committee" });
   }
 };
 
