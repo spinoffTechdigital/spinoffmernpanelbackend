@@ -4,18 +4,19 @@ const Committee = require("../model/Committee");
 
 const createCommittee = async (req, res) => {
   try {
-    const { name, designation, profileSummary, committeecategory, image } = req.body;
+    const { name, designation, profileSummary, committeecategory } = req.body;
+    const image = req.file ? `/committeeimages/${req.file.filename}` : null; // Adjust the path accordingly
 
     if (!name || !designation || !profileSummary || !committeecategory) {
       return res.status(400).json({ error: "All fields are required." });
     }
-    const imageUrl = image || null;  
+
     const newCommittee = new Committee({
       name,
       designation,
       profileSummary,
       committeecategory,
-      image: imageUrl,
+      image: image,  // Store the relative image path in the database
     });
 
     const savedCommittee = await newCommittee.save();
@@ -30,6 +31,7 @@ const createCommittee = async (req, res) => {
     res.status(500).json({ error: "Failed to submit data." });
   }
 };
+
 
 const getAllCommittees = async (req, res) => {
   try {
