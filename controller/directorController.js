@@ -2,8 +2,7 @@ const Director = require("../model/Director");
 
 const createDirector = async (req, res) => {
   try {
-    const { name, designation, profileSummary } = req.body;
-    const image = req.file ? req.file.filename : null;
+    const { name, designation, profileSummary,image } = req.body;
 
     const newDirector = new Director({
       name,

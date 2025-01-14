@@ -1,11 +1,7 @@
-const cloudinary = require('cloudinary').v2;
 const Committee = require("../model/Committee");
-
-
 const createCommittee = async (req, res) => {
   try {
-    const { name, designation, profileSummary, committeecategory } = req.body;
-    const image = req.file ? `/committeeimages/${req.file.filename}` : null; // Adjust the path accordingly
+    const { name, designation, profileSummary, committeecategory, image } = req.body; 
 
     if (!name || !designation || !profileSummary || !committeecategory) {
       return res.status(400).json({ error: "All fields are required." });
@@ -16,7 +12,7 @@ const createCommittee = async (req, res) => {
       designation,
       profileSummary,
       committeecategory,
-      image: image,  // Store the relative image path in the database
+      image, 
     });
 
     const savedCommittee = await newCommittee.save();
@@ -31,6 +27,9 @@ const createCommittee = async (req, res) => {
     res.status(500).json({ error: "Failed to submit data." });
   }
 };
+
+module.exports = { createCommittee };
+
 
 
 const getAllCommittees = async (req, res) => {
