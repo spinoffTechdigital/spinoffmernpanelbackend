@@ -14,7 +14,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true })); 
 app.use('/uploads', express.static('uploads'));
 app.use('/committeeimages', express.static(path.join(__dirname, 'uploads/committeeimages')));
 

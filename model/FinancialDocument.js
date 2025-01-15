@@ -5,6 +5,10 @@ const financialDocumentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  year:{
+    type: String,
+    required: true,
+  },
   file: {
     type: String,
     required: true,
