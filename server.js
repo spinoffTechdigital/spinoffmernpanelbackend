@@ -10,6 +10,8 @@ const committeeRoutes = require("./route/committeeRoutes");
 const financialRoutes = require('./route/financialsroute');
 const shareholdingRoutes = require('./route/shareHoldingRoutes');
 const policyRoutes = require('./route/policyRoute');
+const rhpRoutes = require('./route/rhpRoute');
+const drhpRouts = require('./route/drhpRoute');
 const path = require('path');
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/api/committee',committeeRoutes);
 app.use('/api/financials',financialRoutes);
 app.use('/api/share',shareholdingRoutes);
 app.use('/api/policy',policyRoutes);
+app.use('/api/rhp',rhpRoutes);
+app.use('/api/drhp',drhpRouts);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
