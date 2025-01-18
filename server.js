@@ -12,6 +12,8 @@ const shareholdingRoutes = require('./route/shareHoldingRoutes');
 const policyRoutes = require('./route/policyRoute');
 const rhpRoutes = require('./route/rhpRoute');
 const drhpRouts = require('./route/drhpRoute');
+const prospectusRouts = require('./route/ProspectusRoute');
+const DetailsofRegistrarRoutes = require('./route/DetailsofRegistrarRoutes');
 const path = require('path');
 
 const app = express();
@@ -36,6 +38,8 @@ app.use('/api/share',shareholdingRoutes);
 app.use('/api/policy',policyRoutes);
 app.use('/api/rhp',rhpRoutes);
 app.use('/api/drhp',drhpRouts);
+app.use('/api/prospectus',prospectusRouts);
+app.use('/api/DetailsofRegistrar',DetailsofRegistrarRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
