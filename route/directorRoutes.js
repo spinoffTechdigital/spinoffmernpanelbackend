@@ -4,7 +4,8 @@ const {
   getAllDirectors,
   getDirectorById,
   updateDirectorById,
-  deleteDirectorById,
+  getAllChangeLogs,
+  deleteboardofDirector,
 } = require("../controller/directorController");
 
 const upload = require("../middleware/upload");
@@ -15,6 +16,7 @@ router.post("/board-of-directors", upload.single("image"), createDirector);
 router.get("/board-of-directors", getAllDirectors);
 router.get("/boardofDirector/:id", getDirectorById);
 router.put("/updateboardofDirector/:id", upload.single("image"), updateDirectorById);
-router.delete("/deleteboardofDirector/:id", deleteDirectorById);
+router.get("/changelogs",getAllChangeLogs);
+router.delete("/deleteboardofDirector/:id", deleteboardofDirector);
 
 module.exports = router;

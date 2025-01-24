@@ -1,8 +1,26 @@
 const Director = require("../model/Director");
+const ChangeLog = require("../model/BoardOfDirectorchangeLog");
+
+const createLog = async (
+  action,
+  collectionName,
+  itemId,
+  performedBy,
+  changeDetails
+) => {
+  const log = new ChangeLog({
+    action,
+    collectionName,
+    itemId,
+    performedBy,
+    changeDetails,
+  });
+  await log.save();
+};
 
 const createDirector = async (req, res) => {
   try {
-    const { name, designation, profileSummary,image } = req.body;
+    const { name, designation, profileSummary, image } = req.body;
 
     const newDirector = new Director({
       name,
@@ -12,6 +30,14 @@ const createDirector = async (req, res) => {
     });
 
     const savedDirector = await newDirector.save();
+
+    await createLog(
+      "create",
+      "Director",
+      savedDirector._id,
+      req.user ? req.user.email : "system",
+      { name, designation, profileSummary, image }
+    );
 
     res.status(201).json({
       message: "Board of Directors details submitted successfully!",
@@ -45,13 +71,13 @@ const getDirectorById = async (req, res) => {
       return res.status(404).json({ error: "BoardOfDirector not found" });
     }
 
+
     res.json(boardOfDirector);
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 const updateDirectorById = async (req, res) => {
   try {
@@ -66,13 +92,37 @@ const updateDirectorById = async (req, res) => {
       }
     );
 
-    res.json(updatedBoardOfDirector);
+    await createLog(
+      "update",
+      "Director",
+      updatedDirector._id,
+      req.user ? req.user.email : "system",
+      {
+        before: oldDirector,
+        after: updatedDirector,
+      }
+    );
+
+    res.json(updatedDirector);
   } catch (error) {
     res.status(500).json({ error: "Error updating user" });
   }
 };
 
-const deleteDirectorById = async (req, res) => {
+const getAllChangeLogs = async(req,res)=>{
+  try {
+    const changeLogs = await ChangeLog.find();
+    res.status(200).json({
+      message: "Change logs fetched successfully!",
+      data: changeLogs,
+    });
+  } catch (error) {
+    console.error("Error fetching change logs:", error);
+    res.status(500).json({ error: "Failed to fetch change logs." });
+  }
+}
+
+const deleteboardofDirector = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -81,6 +131,14 @@ const deleteDirectorById = async (req, res) => {
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    await createLog(
+      "delete",
+      "Director",
+      deletedDirector._id,
+      req.user ? req.user.email : "system",
+      { deleted: deletedDirector }
+    );
 
     res.status(200).json({
       message: "User deleted successfully",
@@ -97,5 +155,6 @@ module.exports = {
   getAllDirectors,
   getDirectorById,
   updateDirectorById,
-  deleteDirectorById,
+  getAllChangeLogs,
+  deleteboardofDirector,
 };

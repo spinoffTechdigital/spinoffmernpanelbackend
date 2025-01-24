@@ -2,7 +2,7 @@ const Dealers = require('../model/Dealers');
 
 const submitDealerForm = async (req, res) => {
     try {
-        console.log("Received data:", req.body); // Debugging line
+        console.log("Received data:", req.body); 
 
         const { name, number, location } = req.body;
 
