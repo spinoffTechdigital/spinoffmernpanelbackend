@@ -1,4 +1,5 @@
 const Director = require("../model/Director");
+const User = require("../model/User")
 const ChangeLog = require("../model/BoardOfDirectorchangeLog");
 
 const createLog = async (
@@ -20,13 +21,13 @@ const createLog = async (
 
 const createDirector = async (req, res) => {
   try {
-    const { name, designation, profileSummary, image } = req.body;
-
+    const { name, designation, profileSummary, image, userId } = req.body;
     const newDirector = new Director({
       name,
       designation,
       profileSummary,
       image,
+      userId,
     });
 
     const savedDirector = await newDirector.save();
@@ -35,8 +36,8 @@ const createDirector = async (req, res) => {
       "create",
       "Director",
       savedDirector._id,
-      req.user ? req.user.email : "system",
-      { name, designation, profileSummary, image }
+      userId ,
+      { name, designation, profileSummary, image , userId }
     );
 
     res.status(201).json({
@@ -81,40 +82,70 @@ const getDirectorById = async (req, res) => {
 
 const updateDirectorById = async (req, res) => {
   try {
+    const { id } = req.params;
+    const { userId } = req.body; 
+
+    const oldDirector = await Director.findById(id);
+
+    if (!oldDirector) {
+      return res.status(404).json({ error: "Director not found" });
+    }
+
     const updatedBoardOfDirector = await Director.findByIdAndUpdate(
-      req.params.id,
+      id,
       {
         ...req.body,
         image: req.file ? req.file.path : undefined,
       },
-      {
-        new: true,
-      }
+      { new: true }
     );
+
+    if (!updatedBoardOfDirector) {
+      return res.status(404).json({ error: "Director update failed" });
+    }
 
     await createLog(
       "update",
       "Director",
-      updatedDirector._id,
-      req.user ? req.user.email : "system",
+      updatedBoardOfDirector._id,
+      userId,
       {
         before: oldDirector,
-        after: updatedDirector,
+        after: updatedBoardOfDirector,
       }
     );
 
-    res.json(updatedDirector);
+    res.status(200).json({
+      message: "Director updated successfully",
+      data: updatedBoardOfDirector,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error updating user" });
+    console.error("Error updating director:", error);
+    res.status(500).json({ error: "Error updating director" });
   }
 };
+
 
 const getAllChangeLogs = async(req,res)=>{
   try {
     const changeLogs = await ChangeLog.find();
+
+    const enrichedLogs = await Promise.all(
+      changeLogs.map(async (log) => {
+        if (log.performedBy && log.performedBy !== "system") {
+          const user = await User.findById(log.performedBy);
+          return {
+            ...log.toObject(),
+            performedByName: user ? user.name : "Unknown User",
+          };
+        }
+        return { ...log.toObject(), performedByName: "System" };
+      })
+    );
+
     res.status(200).json({
       message: "Change logs fetched successfully!",
-      data: changeLogs,
+      data: enrichedLogs,
     });
   } catch (error) {
     console.error("Error fetching change logs:", error);
@@ -125,30 +156,32 @@ const getAllChangeLogs = async(req,res)=>{
 const deleteboardofDirector = async (req, res) => {
   try {
     const { id } = req.params;
+    const { userId }= req.body;
 
     const deletedUser = await Director.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Director not found" });
     }
 
     await createLog(
       "delete",
       "Director",
-      deletedDirector._id,
-      req.user ? req.user.email : "system",
-      { deleted: deletedDirector }
+      deletedUser._id,
+      userId,
+      { deleted: deletedUser }
     );
 
     res.status(200).json({
-      message: "User deleted successfully",
+      message: "Director deleted successfully",
       user: deletedUser,
     });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ message: "Error deleting user" });
+    console.error("Error deleting director:", error);
+    res.status(500).json({ message: "Error deleting director" });
   }
 };
+
 
 module.exports = {
   createDirector,

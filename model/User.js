@@ -6,15 +6,14 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   mobile: { type: String, required: true },
-  profileImage: { type: String, default: null, required: false },
-  designation: { type: String, required: false }, 
-  role: { type: String, default: "user", required: false },
+  profileImage: { type: String, default: null },
+  designation: { type: String, default: 'Employee' }, // Default value
+  role: { type: String, default: 'user' }, // Default value
   createdAt: { type: Date, default: Date.now },
 });
 
-
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
