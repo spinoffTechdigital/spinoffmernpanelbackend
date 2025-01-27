@@ -4,6 +4,7 @@ const {
     getAllCommittees,
     getCommitteeById,
     updateCommitteeById,
+    getAllChangeLogs,
     deleteCommitteeById,
   } = require("../controller/committeeController");
   
@@ -16,5 +17,6 @@ const {
   router.get("/boardofCommittee/:id", getCommitteeById);
   router.put("/updateboardofCommittee/:id", upload.single("image"), updateCommitteeById);
   router.delete("/deleteboardofCommittee/:id", deleteCommitteeById);
+  router.get("/changelogs",getAllChangeLogs);
   
   module.exports = router;

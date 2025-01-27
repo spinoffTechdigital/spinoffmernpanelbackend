@@ -1,11 +1,28 @@
 const path = require('path');
 const FinancialDocument = require('../model/FinancialDocument');
+const User = require("../model/User")
+const FinancialChangeLog = require("../model/FinancialChangelogs");
+
+const CreateFinancialChangelog = async(
+  action,
+  collectionName,
+  itemId,
+  performedBy,
+  changeDetails
+) => {
+  const financiallog = new FinancialChangeLog({
+    action,
+    collectionName,
+    itemId,
+    performedBy,
+    changeDetails,
+  });
+  await financiallog.save();
+}
 
 const uploadFinancialDocument = async (req, res) => {
   try {
-    console.log('Incoming request body:', req.body); 
-
-    const { title,year, fileUrl } = req.body;
+    const { title,year, fileUrl,userId } = req.body;
 
     if (!title || !year || !fileUrl) {
       return res.status(400).json({ success: false, message: 'Please provide a title and file URL.' });
@@ -15,10 +32,18 @@ const uploadFinancialDocument = async (req, res) => {
       title,
       year,
       file: fileUrl,
+      userId,
     });
 
     const savedDocument = await newDocument.save();
-    console.log('Saved document:', savedDocument); 
+ 
+    await CreateFinancialChangelog(
+      "create",
+      "FinancialDocument",
+      savedDocument._id,
+      userId ,
+      {title,year,fileUrl,userId}
+    );
 
     res.status(201).json({
       success: true,
@@ -53,8 +78,36 @@ const getFinancialDocuments = async (req, res) => {
   }
 };
 
+const getAllChangeLogs = async(req,res)=>{
+  try {
+    const changeLogs = await FinancialChangeLog.find();
+
+    const enrichedLogs = await Promise.all(
+      changeLogs.map(async (log) => {
+        if (log.performedBy && log.performedBy !== "system") {
+          const user = await User.findById(log.performedBy);
+          return {
+            ...log.toObject(),
+            performedByName: user ? user.name : "Unknown User",
+          };
+        }
+        return { ...log.toObject(), performedByName: "System" };
+      })
+    );
+
+    res.status(200).json({
+      message: "Change logs fetched successfully!",
+      data: enrichedLogs,
+    });
+  } catch (error) {
+    console.error("Error fetching change logs:", error);
+    res.status(500).json({ error: "Failed to fetch change logs." });
+  }
+}
+
 
 module.exports = {
   uploadFinancialDocument,
+  getAllChangeLogs,
   getFinancialDocuments,
 };

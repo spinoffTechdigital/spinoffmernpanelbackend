@@ -11,6 +11,6 @@ const BoardOfDirectorchangeLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const BoardOfDirectorchangeLog = mongoose.model("ChangeLog", BoardOfDirectorchangeLogSchema);
+const BoardOfDirectorchangeLog = mongoose.model("BodChangeLog", BoardOfDirectorchangeLogSchema);
 
 module.exports = BoardOfDirectorchangeLog;
