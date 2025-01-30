@@ -1,11 +1,30 @@
 const path = require('path');
 const shareHolding = require('../model/shareHolding');
+const User = require("../model/User")
+const shareHoldingChangeLog = require("../model/shareHoldingChangelog");
+
+const ShareholdingChangeLog = async(
+  action,
+  collectionName,
+  itemId,
+  performedBy,
+  changeDetails
+) => {
+  const shareholdinglog = new shareHoldingChangeLog({
+    action,
+    collectionName,
+    itemId,
+    performedBy,
+    changeDetails,
+  });
+  await shareholdinglog.save();
+}
 
 const uploadShareHoldingDocument = async (req, res) => {
     try {
       console.log('Incoming request body:', req.body); 
   
-      const { title,year, fileUrl } = req.body;
+      const { title,year, fileUrl ,userId} = req.body;
   
       if (!title || !year || !fileUrl) {
         return res.status(400).json({ success: false, message: 'Please provide a title and file URL.' });
@@ -15,10 +34,19 @@ const uploadShareHoldingDocument = async (req, res) => {
         title,
         year,
         file: fileUrl,
+        userId,
       });
   
       const savedshareDocument = await newshareHoldingDocument.save();
-      console.log('Saved document:', savedshareDocument); 
+
+      await ShareholdingChangeLog(
+        "create",
+        "shareHolding",
+        savedshareDocument._id,
+        userId ,
+        {title,year,fileUrl,userId}
+      );
+     
   
       res.status(201).json({
         success: true,
@@ -52,9 +80,37 @@ const uploadShareHoldingDocument = async (req, res) => {
       res.status(500).json({ success: false, message: 'Error fetching documents.' });
     }
   };
+
+  const getAllChangeLogs = async(req,res)=>{
+    try {
+      const changeLogs = await shareHoldingChangeLog.find();
+  
+      const enrichedLogs = await Promise.all(
+        changeLogs.map(async (log) => {
+          if (log.performedBy && log.performedBy !== "system") {
+            const user = await User.findById(log.performedBy);
+            return {
+              ...log.toObject(),
+              performedByName: user ? user.name : "Unknown User",
+            };
+          }
+          return { ...log.toObject(), performedByName: "System" };
+        })
+      );
+  
+      res.status(200).json({
+        message: "Change logs fetched successfully!",
+        data: enrichedLogs,
+      });
+    } catch (error) {
+      console.error("Error fetching change logs:", error);
+      res.status(500).json({ error: "Failed to fetch change logs." });
+    }
+  }
   
   
   module.exports = {
     uploadShareHoldingDocument,
+    getAllChangeLogs,
     getShareHoldingDocuments,
   };
