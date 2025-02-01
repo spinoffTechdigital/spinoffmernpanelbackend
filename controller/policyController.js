@@ -8,7 +8,7 @@ const PolicyChangeLog = async (
   collectionName,
   itemId,
   performedBy,
-  changeDetails
+  changeDetails,
 ) => {
   const policylog = new policyChangeLog({
     action,

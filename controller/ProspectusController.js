@@ -1,11 +1,29 @@
 const path = require('path');
 const Prospectus = require('../model/Prospectus');
+const User = require('../model/User');
+const ProspectusChangelog = require('../model/ProspectusChangelog');
+
+const CreateprospectusChangelog = async (
+  action,
+  collectionName,
+  itemId,
+  performedBy,
+  changeDetails,
+) => {
+  const prospectuslog = new ProspectusChangelog({
+    action,
+    collectionName,
+    itemId,
+    performedBy,
+    changeDetails,
+  })
+  await prospectuslog.save();
+}
 
 const uploadProspectusDocument = async (req, res) => {
     try {
-      console.log('Incoming request body:', req.body); 
   
-      const { title,year, fileUrl } = req.body;
+      const { title,year, fileUrl ,userId} = req.body;
   
       if (!title || !year || !fileUrl) {
         return res.status(400).json({ success: false, message: 'Please provide a title and file URL.' });
@@ -15,10 +33,18 @@ const uploadProspectusDocument = async (req, res) => {
         title,
         year,
         file: fileUrl,
+        userId,
       });
   
       const savedProspectusDocument = await newProspectusDocument.save();
-      console.log('Saved document:', savedProspectusDocument); 
+     
+      await CreateprospectusChangelog(
+        'create',
+        'ProspectusChangelog',
+        savedProspectusDocument._id,
+        userId,
+        {title,year,fileUrl,userId},
+      )
   
       res.status(201).json({
         success: true,
@@ -30,7 +56,6 @@ const uploadProspectusDocument = async (req, res) => {
       res.status(500).json({ success: false, message: 'Server error during file upload.' });
     }
   };
-  
   
   const getProspectusDocuments = async (req, res) => {
     try {
@@ -53,8 +78,35 @@ const uploadProspectusDocument = async (req, res) => {
     }
   };
   
+  const getAllChangeLogs = async(req,res)=>{
+    try {
+      const changeLogs = await ProspectusChangelog.find();
+  
+      const enrichedLogs = await Promise.all(
+        changeLogs.map(async (log) => {
+          if (log.performedBy && log.performedBy !== "system") {
+            const user = await User.findById(log.performedBy);
+            return {
+              ...log.toObject(),
+              performedByName: user ? user.name : "Unknown User",
+            };
+          }
+          return { ...log.toObject(), performedByName: "System" };
+        })
+      );
+  
+      res.status(200).json({
+        message: "Change logs fetched successfully!",
+        data: enrichedLogs,
+      });
+    } catch (error) {
+      console.error("Error fetching change logs:", error);
+      res.status(500).json({ error: "Failed to fetch change logs." });
+    }
+  }
   
   module.exports = {
     uploadProspectusDocument,
+    getAllChangeLogs,
     getProspectusDocuments,
   };
