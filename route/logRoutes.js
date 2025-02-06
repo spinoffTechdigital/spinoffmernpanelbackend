@@ -4,6 +4,7 @@ const {
   getTypeCounts,
   getAllLogs,
   getVisitCounts,
+  getRecentLogs,
   getHighestVisitedPage,
 } = require("../controller/logController");
 
@@ -14,5 +15,6 @@ router.get("/typeCount", getTypeCounts);
 router.get("/allLogs", getAllLogs);
 router.get("/highestVisitedPage",getHighestVisitedPage);
 router.get("/visitCounts", getVisitCounts);
+router.get("/recentLogs",getRecentLogs);
 
 module.exports = router;

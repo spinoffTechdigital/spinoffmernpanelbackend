@@ -104,6 +104,19 @@ const getVisitCounts = async (req, res) => {
   }
 };
 
+const getRecentLogs = async (req, res) => {
+  try {
+    const recentLogs = await Log.find()
+      .sort({ timestamp: -1 }) 
+      .limit(10); 
+
+    res.status(200).json(recentLogs);
+  } catch (error) {
+    console.error("Error fetching recent logs:", error);
+    res.status(500).json({ message: "Error fetching recent logs" });
+  }
+};
+
 const isToday = (date) => date.toDateString() === new Date().toDateString();
 
 const isThisWeek = (date) => {
@@ -136,5 +149,6 @@ module.exports = {
   getTypeCounts,
   getAllLogs,
   getVisitCounts,
+  getRecentLogs,
   getHighestVisitedPage,
 };
