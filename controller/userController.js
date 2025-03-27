@@ -14,7 +14,7 @@ const registerUser = async (req, res) => {
     const user = new User({
       name,
       email,
-      password, // No manual hashing needed
+      password, 
       mobile,
       designation,
       role,

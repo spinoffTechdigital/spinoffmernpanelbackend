@@ -16,6 +16,7 @@ const prospectusRouts = require('./route/ProspectusRoute');
 const DetailsofRegistrarRoutes = require('./route/DetailsofRegistrarRoutes');
 const InvestorGrievanceRoutes = require('./route/InvestorGrievanceRoute');
 const dealersRoutes = require('./route/dealersRoute');
+const subsRoutes = require('./route/subscribeRoute');
 const path = require('path');
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/prospectus',prospectusRouts);
 app.use('/api/DetailsofRegistrar',DetailsofRegistrarRoutes);
 app.use('/api/InvestorGrievance',InvestorGrievanceRoutes);
 app.use('/api/dealers',dealersRoutes);
+app.use('/api/subsroute',subsRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
